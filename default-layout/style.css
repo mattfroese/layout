@@ -1,0 +1,15 @@
+.item {
+	background: red;
+	padding: 60px;
+}
+.item > .item {
+	background: blue;
+	padding: 60px;
+}
+
+@media (min-width: 768px) {
+	.item {
+		background: rgb(223, 223, 223);
+		padding: 60px;
+	}
+}

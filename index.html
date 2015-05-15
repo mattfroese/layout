@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<section id="header-panel" class="panel">
+	Device switcher go here - <a class="hide-prop">Hide properties</a>
+</section>
+
+<section id="property-panel" class="panel">
+<div class="panel-group">
+	<div class="panel-heading">
+		<div id="element-name">Select element</div>
+	</div>
+</div>
+<div class="panel-group">
+	<div class="panel-heading">
+		<div id="element-name">Background</div>
+	</div>
+	<div class="panel-item">
+		<div class="property-name">Image</div>
+		<div class="property-value">none</div>
+	</div>
+	<div class="panel-item">
+		<div class="property-name">Color</div>
+		<div class="property-value">none</div>
+	</div>
+</div>
+
+</section>
+
+<section id="iframe-panel">
+	<iframe id="layout-frame" src="default-layout/" frameborder="0"></iframe>
+</section>
+
+<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+<script type="text/javascript">
+$(document).on("click",".hide-prop", function() { $("body").toggleClass("property-hide"); } );
+
+var Layout = {
+	
+	/* frame options */
+	frameId: "#layout-frame",
+	frame: null,
+	document: null,
+
+	/* styles */
+
+	cssRules: null,
+	elementMatchCSSRule: null,
+
+	init: function() {
+		console.log( this.frame );
+		this.frame = document.querySelector( this.frameId );
+		this.document = this.frame.contentDocument;
+
+		// events
+		this.document.addEventListener('click', this.frameClick, false);
+		this.frame.addEventListener('load', this.frameLoaded, false);
+	},
+
+	/* loadProperties: Loads property panel with an element */
+	loadProperties: function( element ) {
+		console.log( "loadProperties", element );
+		var n = document.querySelector("#element-name");
+		n.innerHTML = element.tagName + "." + element.className;
+
+		var elementRules = Layout.cssRules.filter( Layout.elementMatchCSSRule.bind(null,n) );
+		console.log( "loadProperties cssRules", Layout.cssRules, elementRules );
+	},
+
+	/* 	EVENTS	*/
+	// frameClick: Runs when element inside the frame is clicked
+	frameClick: function( event ) {
+		console.log( "frameClick", event );
+		Layout.loadProperties( event.target );
+	},
+	frameLoaded: function( event ) {
+		console.log( "frameLoaded", event );
+
+		var d = Layout.document;
+		Layout.cssRules = slice(d.styleSheets).reduce(function(rules, styleSheet) {
+		  return rules.concat(slice(styleSheet.cssRules));
+		}, []);
+
+		Layout.elementMatchCSSRule = function(element, cssRule) {
+			console.log( cssRule.selectorText );
+		  return matches(element, cssRule.selectorText);
+		};
+
+		Layout.print();
+	},
+	print: function() {
+		console.log( "Frame", this.frame );
+		console.log( "Frame Document", this.document );
+		console.log( "Frame StyleSheets", this.document.styleSheets );
+		console.log( "Frame Scripts", this.document.scripts );
+		console.log( "Frame First Child Element", this.document.firstChildElement );
+
+		console.log( "CSS First Rule", this.document.styleSheets[0].cssRules );
+	},
+}
+
+Layout.init();
+
+
+/* 
+
+CSS Rules 
+
+Find all the CSS rules applied to a specific element; and check if a CSS property for a specific element is defined in the stylesheet – not inline style. Notice that is not like `getComputedStyle`, that returns the calculated properties for a specific element.
+
+https://gist.github.com/ZER0/5267608
+
+*/
+var proto = Element.prototype;
+var slice = Function.call.bind(Array.prototype.slice);
+var matches = Function.call.bind(proto.matchesSelector || 
+                proto.mozMatchesSelector || proto.webkitMatchesSelector ||
+                proto.msMatchesSelector || proto.oMatchesSelector);
+ 
+// Returns true if a DOM Element matches a cssRule
+
+
+</script>
+</body>
+</html>
