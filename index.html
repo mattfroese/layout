@@ -36,6 +36,25 @@
 </section>
 
 <script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+<script type="text/javascript" src="cssutilities/CSSUtilities.js"></script>
+<script type="text/javascript" src="cssutilities/Selector.js"></script>
+<script type="text/javascript">
+
+    // CSSUtilities.define("async", true);
+    // CSSUtilities.define("mode", "author");
+    CSSUtilities.define('async', true);
+    CSSUtilities.define("base", document.querySelector( "#layout-frame" ).contentDocument.location.href);
+    CSSUtilities.define("page", document.querySelector( "#layout-frame" ).contentDocument );
+
+    document.querySelector( "#layout-frame" ).addEventListener('load', function() {
+    	//initialize with callback
+   		CSSUtilities.init();
+   		console.log( "iframe loaded CSS init" );
+    }, false);
+    
+
+</script>
+
 <script type="text/javascript">
 $(document).on("click",".hide-prop", function() { $("body").toggleClass("property-hide"); } );
 
@@ -52,7 +71,6 @@ var Layout = {
 	elementMatchCSSRule: null,
 
 	init: function() {
-		console.log( this.frame );
 		this.frame = document.querySelector( this.frameId );
 		this.document = this.frame.contentDocument;
 
@@ -64,11 +82,17 @@ var Layout = {
 	/* loadProperties: Loads property panel with an element */
 	loadProperties: function( element ) {
 		console.log( "loadProperties", element );
+
 		var n = document.querySelector("#element-name");
 		n.innerHTML = element.tagName + "." + element.className;
 
-		var elementRules = Layout.cssRules.filter( Layout.elementMatchCSSRule.bind(null,n) );
-		console.log( "loadProperties cssRules", Layout.cssRules, elementRules );
+		CSSUtilities.getCSSProperties( element, "min-width: 768px", function() {
+			console.log( "getCSSRules", arguments );
+		} )
+
+		
+		console.log( "getCSSStyleSheets", CSSUtilities.getCSSStyleSheets(  function() { console.log( "getCSSStyleSheets done", arguments) }) );
+		console.log( "getCSSStyleSheets", CSSUtilities.getCSSStyleSheetRules( "all", "","", -1, function() { console.log( "getCSSStyleSheetRules done", arguments) }) );
 	},
 
 	/* 	EVENTS	*/
@@ -80,26 +104,16 @@ var Layout = {
 	frameLoaded: function( event ) {
 		console.log( "frameLoaded", event );
 
-		var d = Layout.document;
-		Layout.cssRules = slice(d.styleSheets).reduce(function(rules, styleSheet) {
-		  return rules.concat(slice(styleSheet.cssRules));
-		}, []);
-
-		Layout.elementMatchCSSRule = function(element, cssRule) {
-			console.log( cssRule.selectorText );
-		  return matches(element, cssRule.selectorText);
-		};
-
 		Layout.print();
 	},
 	print: function() {
 		console.log( "Frame", this.frame );
-		console.log( "Frame Document", this.document );
-		console.log( "Frame StyleSheets", this.document.styleSheets );
-		console.log( "Frame Scripts", this.document.scripts );
-		console.log( "Frame First Child Element", this.document.firstChildElement );
+		// console.log( "Frame Document", this.document );
+		// console.log( "Frame StyleSheets", this.document.styleSheets );
+		// console.log( "Frame Scripts", this.document.scripts );
+		// console.log( "Frame First Child Element", this.document.firstChildElement );
 
-		console.log( "CSS First Rule", this.document.styleSheets[0].cssRules );
+		// console.log( "CSS First Rule", this.document.styleSheets[0].cssRules );
 	},
 }
 
